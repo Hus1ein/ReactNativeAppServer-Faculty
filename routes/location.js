@@ -21,7 +21,13 @@ router.post('/', function(req, res, next) {
         if (err){
             console.log(err);
         } else {
-            let newLocation = req.body;
+            let newLocation = {
+                "person": req.body.person,
+                "coordinate": {
+                    "latitude": req.body.latitude,
+                    "longitude": req.body.longitude
+                }
+            };
             let locations = JSON.parse(data); //now it an object
             locations.push(newLocation); //add some data
             let locationsAsString = JSON.stringify(locations); //convert it back to json
