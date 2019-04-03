@@ -10,7 +10,7 @@ router.get('/', function(req, res, next) {
             console.log(err);
         } else {
             locations = JSON.parse(data);
-            res.send(locations);
+            res.send({"location_list": locations});
             console.log(data);
         }});
 });
