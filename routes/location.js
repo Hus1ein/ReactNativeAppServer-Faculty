@@ -1,10 +1,12 @@
 var express = require('express');
 var router = express.Router();
 var fs = require('fs');
+var path = require('path');
 
 router.get('/', function(req, res, next) {
 
-    fs.readFile('Database.json', 'utf8', function readFileCallback(err, data){
+    var jsonPath = path.join(__dirname, '..', 'Database', 'locations.json');
+    fs.readFile(jsonPath, 'utf8', function readFileCallback(err, data){
         let locations;
         if (err){
             console.log(err);
@@ -17,7 +19,8 @@ router.get('/', function(req, res, next) {
 
 router.post('/', function(req, res, next) {
 
-    fs.readFile('Database.json', 'utf8', function readFileCallback(err, data){
+    var jsonPath = path.join(__dirname, '..', 'Database', 'locations.json');
+    fs.readFile(jsonPath, 'utf8', function readFileCallback(err, data){
         if (err){
             console.log(err);
         } else {
@@ -28,10 +31,10 @@ router.post('/', function(req, res, next) {
                     "longitude": req.body.longitude
                 }
             };
-            let locations = JSON.parse(data); //now it an object
-            locations.push(newLocation); //add some data
-            let locationsAsString = JSON.stringify(locations); //convert it back to json
-            fs.writeFile('Database.json', locationsAsString, 'utf8', () => {
+            let locations = JSON.parse(data);
+            locations.push(newLocation);
+            let locationsAsString = JSON.stringify(locations);
+            fs.writeFile(jsonPath, locationsAsString, 'utf8', () => {
                 res.send(newLocation);
             }); // write it back
         }});
