@@ -3,9 +3,13 @@ var router = express.Router();
 var fs = require('fs');
 var path = require('path');
 
-router.get('/:id', function(req, res, next) {
+router.get('/', function(req, res, next) {
 
-    let currentUser = req.param('id');
+
+    let sender = req.param('sender');
+    let receiver = req.param('receiver');
+    console.log(sender);
+    console.log(receiver);
     var jsonPath = path.join(__dirname, '..', 'Database', 'messages.json');
     fs.readFile(jsonPath, 'utf8', function readFileCallback(err, data){
         let result = [];
@@ -14,7 +18,7 @@ router.get('/:id', function(req, res, next) {
         } else {
             let allMessages = JSON.parse(data);
             for (let i = 0; i < allMessages.length; i++) {
-                if (allMessages[i].sender === currentUser || allMessages[i].receiver === currentUser) {
+                if (allMessages[i].sender === sender || allMessages[i].receiver === receiver) {
                     result.push(allMessages[i]);
                 }
             } 
