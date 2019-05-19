@@ -1,43 +1,51 @@
 var express = require('express');
 var router = express.Router();
 var fs = require('fs');
-var path = require('path');
+let locationsService = require('../Database/LocationsService');
+let usersService = require('../Database/UsersService');
 
 router.get('/', function(req, res, next) {
 
-    var jsonPath = path.join(__dirname, '..', 'Database', 'locations.json');
-    fs.readFile(jsonPath, 'utf8', function readFileCallback(err, data){
-        let locations;
-        if (err){
-            console.log(err);
-        } else {
-            locations = JSON.parse(data);
-            res.send({"location_list": locations});
-            console.log(data);
-        }});
+    if (req.headers.authorization != null) {
+        usersService.getUserByUsername(req.headers.authorization, (user) => {
+
+           if (user != null) {
+               locationsService.getAllByUserId(user._id, (locations) => {
+                   res.status(200).send({"location_list": locations});
+               })
+           } else {
+               res.status(403).send("unauthorized");
+           }
+        });
+    } else {
+        res.status(403).send("unauthorized");
+    }
+
 });
 
 router.post('/', function(req, res, next) {
 
-    var jsonPath = path.join(__dirname, '..', 'Database', 'locations.json');
-    fs.readFile(jsonPath, 'utf8', function readFileCallback(err, data){
-        if (err){
-            console.log(err);
-        } else {
-            let newLocation = {
-                "person": req.body.person,
-                "coordinate": {
-                    "latitude": req.body.latitude,
-                    "longitude": req.body.longitude
-                }
-            };
-            let locations = JSON.parse(data);
-            locations.push(newLocation);
-            let locationsAsString = JSON.stringify(locations);
-            fs.writeFile(jsonPath, locationsAsString, 'utf8', () => {
-                res.send(newLocation);
-            }); // write it back
-        }});
+    if (req.headers.authorization != null) {
+        usersService.getUserByUsername(req.headers.authorization, (user) => {
+            if (user != null) {
+                let newLocation = {
+                    "person": user._id,
+                    "coordinate": {
+                        "latitude": req.body.latitude,
+                        "longitude": req.body.longitude
+                    }
+                };
+                locationsService.create(newLocation, (location) => {
+                    res.status(201).send({"location": location});
+                })
+            } else {
+                res.status(403).send("unauthorized");
+            }
+        });
+    } else {
+        res.status(403).send("unauthorized");
+    }
+
 });
 
 module.exports = router;
