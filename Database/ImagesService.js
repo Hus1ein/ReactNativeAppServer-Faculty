@@ -5,7 +5,6 @@ let imagesCollection = db.collection("images");
 module.exports = {
 
     create : function (image, callback) {
-        image.userId = image.userId.toHexString();
         imagesCollection.insertMany([image], (err, result) => {
             if (!err) {
                 callback(result.ops);
@@ -13,8 +12,9 @@ module.exports = {
         });
     },
 
-    getAllByUserId : function (userId, callback) {
-        imagesCollection.find({'userId': userId.toHexString()}).toArray(function(err, docs) {
+    getAllByUserId : function (username, callback) {
+        //userId.toHexString()
+        imagesCollection.find({'username': username}).toArray(function(err, docs) {
             callback(docs);
         });
     },

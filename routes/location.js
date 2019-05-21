@@ -10,7 +10,7 @@ router.get('/', function(req, res, next) {
         usersService.getUserByUsername(req.headers.authorization, (user) => {
 
            if (user != null) {
-               locationsService.getAllByUserId(user._id, (locations) => {
+               locationsService.getAllByUserId(user.username, (locations) => {
                    res.status(200).send({"location_list": locations});
                })
            } else {
@@ -29,7 +29,7 @@ router.post('/', function(req, res, next) {
         usersService.getUserByUsername(req.headers.authorization, (user) => {
             if (user != null) {
                 let newLocation = {
-                    "person": user._id,
+                    "person": user.username,
                     "coordinate": {
                         "latitude": req.body.latitude,
                         "longitude": req.body.longitude

@@ -6,6 +6,7 @@ const fs = require('fs');
 const image2base64 = require('image-to-base64');
 let usersService = require('../Database/UsersService');
 let imagesService = require('../Database/ImagesService');
+var resizebase64 = require('resize-base64')
 
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -30,8 +31,9 @@ router.post('/', upload.single('myPic'), function (req, res, next) {
                             (response) => {
                                 fs.unlinkSync(path.join(__dirname, '../') + req.file.path);
                                 let newImage = {
-                                    "userId": user._id,
-                                    "image": response
+                                    "createAt": new Date(),
+                                    "username": user.username,
+                                    "image": response,
                                 };
                                 imagesService.create(newImage, (createdImage) => {
                                     res.status(201).send("created");
@@ -62,7 +64,7 @@ router.get('/', function (req, res, next) {
         usersService.getUserByUsername(req.headers.authorization, (user) => {
 
             if (user != null) {
-                imagesService.getAllByUserId(user._id, (images) => {
+                imagesService.getAllByUserId(user.username, (images) => {
                     res.status(200).send(images);
                 })
             } else {
@@ -72,6 +74,10 @@ router.get('/', function (req, res, next) {
     } else {
         res.status(403).send("unauthorized");
     }
+});
+
+router.get("/image.png", (req, res) => {
+    res.sendFile(path.join(__dirname, "/../upload/newspaper.png"));
 });
 
 module.exports = router;

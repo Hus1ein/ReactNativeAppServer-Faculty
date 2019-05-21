@@ -5,7 +5,6 @@ let locationsCollection = db.collection("locations");
 module.exports = {
 
     create : function (location, callback) {
-        location.person = location.person.toHexString();
         locationsCollection.insertMany([location], (err, result) => {
            if (!err) {
                callback(result.ops);
@@ -13,8 +12,8 @@ module.exports = {
         });
     },
 
-    getAllByUserId : function (userId, callback) {
-        locationsCollection.find({'person': userId.toHexString()}).toArray(function(err, docs) {
+    getAllByUserId : function (username, callback) {
+        locationsCollection.find({'person': username}).toArray(function(err, docs) {
             callback(docs);
         });
     },
