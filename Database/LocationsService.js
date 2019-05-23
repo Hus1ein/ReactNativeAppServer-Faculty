@@ -12,7 +12,7 @@ module.exports = {
         });
     },
 
-    getAllByUserId : function (username, callback) {
+    getAll : function (callback) {
         locationsCollection.find({}).toArray(function(err, docs) {
             callback(docs);
         });
