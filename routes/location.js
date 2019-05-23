@@ -10,7 +10,7 @@ router.get('/', function(req, res, next) {
         usersService.getUserByUsername(req.headers.authorization, (user) => {
 
            if (user != null) {
-               locationsService.getAllByUserId(user.username, (locations) => {
+               locationsService.getAll((locations) => {
                    res.status(200).send({"location_list": locations});
                })
            } else {

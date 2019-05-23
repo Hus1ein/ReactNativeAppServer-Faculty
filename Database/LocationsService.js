@@ -13,7 +13,7 @@ module.exports = {
     },
 
     getAllByUserId : function (username, callback) {
-        locationsCollection.find({'person': username}).toArray(function(err, docs) {
+        locationsCollection.find({}).toArray(function(err, docs) {
             callback(docs);
         });
     },

@@ -2,51 +2,58 @@ var express = require('express');
 var router = express.Router();
 var fs = require('fs');
 var path = require('path');
+let messagesService = require('../Database/MessagesService');
+let usersService = require('../Database/UsersService');
 
 router.get('/', function(req, res, next) {
 
+    if (req.headers.authorization != null) {
+        usersService.getUserByUsername(req.headers.authorization, (user) => {
 
-    let sender = req.param('sender');
-    let receiver = req.param('receiver');
-    console.log(sender);
-    console.log(receiver);
-    var jsonPath = path.join(__dirname, '..', 'Database', 'messages.json');
-    fs.readFile(jsonPath, 'utf8', function readFileCallback(err, data){
-        let result = [];
-        if (err){
-            console.log(err);
-        } else {
-            let allMessages = JSON.parse(data);
-            for (let i = 0; i < allMessages.length; i++) {
-                if (allMessages[i].sender === sender || allMessages[i].receiver === receiver) {
-                    result.push(allMessages[i]);
-                }
-            } 
-            res.send({"message_list": result});
-            console.log(data);
-        }});
+            if (user != null) {
+                let sender = user.username;
+                let receiver = req.param('receiver');
+                console.log(sender);
+                console.log(receiver);
+                messagesService.getAll(sender, receiver, (result) => {
+                    res.send({"message_list": result});
+                    console.log(result);
+                });
+            } else {
+                res.status(403).send("unauthorized");
+            }
+        });
+    } else {
+        res.status(403).send("unauthorized");
+    }
+
+
 });
 
 router.post('/', function(req, res, next) {
 
-    var jsonPath = path.join(__dirname, '..', 'Database', 'messages.json');
-    fs.readFile(jsonPath, 'utf8', function readFileCallback(err, data){
-        if (err){
-            console.log(err);
-        } else {
-            let newMessage = {
-                "sender": req.body.sender,
-                "receiver": req.body.receiver,
-                "date": new Date(),
-                "content": req.body.content,
-            };
-            let messages = JSON.parse(data); //now it an object
-            messages.push(newMessage); //add some data
-            let messagesAsString = JSON.stringify(messages); //convert it back to json
-            fs.writeFile(jsonPath,messagesAsString, 'utf8', () => {
-                res.send(newMessage);
-            }); // write it back
-        }});
+    if (req.headers.authorization != null) {
+        usersService.getUserByUsername(req.headers.authorization, (user) => {
+
+            if (user != null) {
+                let newMessage = {
+                    "sender": user.username,
+                    "receiver": req.body.receiver,
+                    "date": new Date(),
+                    "content": req.body.content,
+                };
+
+                messagesService.create(newMessage, (createdMessage) => {
+                    res.send(createdMessage);
+                });
+            } else {
+                res.status(403).send("unauthorized");
+            }
+        });
+    } else {
+        res.status(403).send("unauthorized");
+    }
+
 });
 
 module.exports = router;
