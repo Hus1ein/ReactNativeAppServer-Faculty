@@ -13,7 +13,7 @@ module.exports = {
     },
 
     getAll : function (sender, receiver, callback) {
-        messagesCollection.find({'sender': sender, 'receiver': receiver}).toArray(function(err, docs) {
+        messagesCollection.find({$or:[{'sender': sender, 'receiver': receiver},{'sender': receiver, 'receiver': sender}]}).toArray(function(err, docs) {
             callback(docs);
         });
     },
