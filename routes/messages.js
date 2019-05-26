@@ -1,58 +1,40 @@
-var express = require('express');
-var router = express.Router();
-var fs = require('fs');
-var path = require('path');
-let messagesService = require('../Database/MessagesService');
-let usersService = require('../Database/UsersService');
+const express = require('express');
+const messagesService = require('../Services/MessagesService');
+const usersService = require('../Services/UsersService');
+let router = express.Router();
 
 router.get('/', function(req, res, next) {
 
-    if (req.headers.authorization != null) {
-        usersService.getUserByUsername(req.headers.authorization, (user) => {
+    if (req.user.username === req.query.firstUser || req.user.username === req.query.secondUser) {
 
-            if (user != null) {
-                let sender = user.username;
-                let receiver = req.param('receiver');
-                console.log(sender);
-                console.log(receiver);
-                messagesService.getAll(sender, receiver, (result) => {
-                    res.send({"message_list": result});
-                    console.log(result);
-                });
-            } else {
-                res.status(403).send("unauthorized");
-            }
+        messagesService.findAll(req.query.firstUser, req.query.secondUser, (result) => {
+            res.status(200).send(result);
         });
-    } else {
-        res.status(403).send("unauthorized");
-    }
 
+    } else {
+        res.status(403).send("Forbidden");
+    }
 
 });
 
 router.post('/', function(req, res, next) {
 
-    if (req.headers.authorization != null) {
-        usersService.getUserByUsername(req.headers.authorization, (user) => {
+    usersService.getUserByUsername(req.body.receiver, (user) => {
+        if (user != null) {
+            let newMessage = {
+                "sender": req.user.username,
+                "receiver": req.body.receiver,
+                "date": new Date(),
+                "content": req.body.content,
+            };
 
-            if (user != null) {
-                let newMessage = {
-                    "sender": user.username,
-                    "receiver": req.body.receiver,
-                    "date": new Date(),
-                    "content": req.body.content,
-                };
-
-                messagesService.create(newMessage, (createdMessage) => {
-                    res.send(createdMessage);
-                });
-            } else {
-                res.status(403).send("unauthorized");
-            }
-        });
-    } else {
-        res.status(403).send("unauthorized");
-    }
+            messagesService.create(newMessage, (createdMessage) => {
+                res.status(201).send(createdMessage);
+            });
+        } else {
+            res.status(400).send("Bad request");
+        }
+    })
 
 });
 
